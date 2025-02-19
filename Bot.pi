@@ -1,0 +1,31 @@
+import time
+import requests
+from bs4 import BeautifulSoup
+from telegram import Bot
+
+# إعدادات التليجرام
+TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+CHAT_ID = "YOUR_CHAT_ID"
+
+# رابط صفحة التذاكر على تذكرتي
+URL = "https://www.tazkarti.com/match-url"
+
+def check_tickets():
+    response = requests.get(URL)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        if "نفذت التذاكر" not in soup.text:  # أو عدّلها حسب النص الموجود على الموقع
+            return True
+    return False
+
+def send_notification():
+    bot = Bot(token=TELEGRAM_TOKEN)
+    message = "التذاكر متاحة الآن! سارع بالحجز على تذكرتي."
+    bot.send_message(chat_id=CHAT_ID, text=message)
+
+if __name__ == "__main__":
+    while True:
+        if check_tickets():
+            send_notification()
+            break  # أوقف الفحص بعد العثور على التذاكر
+        time.sleep(60)  # الفحص كل دقيقة
